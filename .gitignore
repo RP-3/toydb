@@ -1,0 +1,6 @@
+**/**/.DS_Store
+.vscode
+answers
+build/**/*
+node_modules/**/*
+data/**/*

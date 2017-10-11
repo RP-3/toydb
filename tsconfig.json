@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "strictNullChecks": true,
+        "sourceMap": true,
+        "target": "es5",
+        "moduleResolution": "node",
+        "allowJs": true,
+        "outDir": "./build",
+        "module": "commonjs",
+        "declaration": false,
+        "noImplicitAny": true,
+        "removeComments": true,
+        "baseUrl": "src",
+        "noLib": false
+    },
+    "include": [
+        "./src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        ".node_modules"
+    ]
+}
