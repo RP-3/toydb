@@ -1,4 +1,4 @@
-import { FilescanNode } from './nodes/FileScanNode2'
+import { FilescanNode } from './nodes/FileScanNode'
 import { ProjectionNode } from './nodes/ProjectionNode';
 import { SortNode, sortDirection } from './nodes/SortNode';
 import { SelectionNode, operator } from './nodes/SelectionNode';
