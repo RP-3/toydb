@@ -6,10 +6,10 @@ export type operator = '=' | '<' | '>' | '>=' | '<=' | 'ISNULL' | 'ISNOTNULL';
 export class SelectionNode {
 
     constructor(
-        private child: INode,
         private operator: operator,
         private column: string,
-        private constant: primitive
+        private constant: primitive,
+        private child: INode
     ){}
 
     next(): any | null {

@@ -5,18 +5,18 @@ import { SelectionNode, operator } from './nodes/SelectionNode';
 import { DistinctNode } from './nodes/DistinctNode';
 import { primitive } from './Schema'
 
-const dataDir = '/Users/rohanpethiyagoda/Documents/code/academics/bradfield/databases/toyDb/data/';
+const dataDir = '/Users/sarith21/Documents/code/toydb/data/';
 
 export interface INode {
     next: () => any | null;
 }
 
 const nodeMap = {
-    'SELECTION': (child: INode, o: operator, column: string, constant: primitive) => new SelectionNode(child, o, column, constant),
-    'DISTINCT': (child: INode, column: string) => new DistinctNode(child, column),
-    'SORT': (child: INode, column: string, direction: sortDirection) => new SortNode(child, column, direction),
-    'PROJECTION': (child: INode, columnList: string[]) => new ProjectionNode(child, columnList),
-    'FILESCAN': (sourceName: string) => new FilescanNode(dataDir, sourceName)
+    'SELECTION': (o: operator, column: string, constant: primitive, child: INode) => new SelectionNode(o, column, constant, child),
+    'DISTINCT': (column: string, child: INode) => new DistinctNode(column, child),
+    'SORT': (column: string, direction: sortDirection, child: INode) => new SortNode(column, direction, child),
+    'PROJECTION': (columnList: string[], child: INode) => new ProjectionNode(columnList, child),
+    'FILESCAN': (sourceName: string) => new FilescanNode(dataDir, sourceName),
 }
 
 type nodeType = 'SELECTION' | 'DISTINCT' | 'SORT' | 'PROJECTION' | 'FILESCAN';
@@ -26,28 +26,29 @@ class Executor{
     public rootNode: INode;
     private empty = false;
 
+    private isNode(arg: any){
+        return Array.isArray(arg) && nodeMap.hasOwnProperty(arg[0]);
+    }
+
+    private instantiateNode(nodeArgs: any[]){
+
+        const nodeType: nodeType = nodeArgs[0];
+        if(!nodeMap.hasOwnProperty(nodeType)) throw new Error(`Unknown node type ${nodeType}`);
+
+        // if its a leaf, return immediately
+        if(nodeType === 'FILESCAN') return nodeMap['FILESCAN'](nodeArgs[1]);
+
+        // else recursively parse the remaining arguments
+        const fixedNodeArgs: any = nodeArgs.slice(1).map((nodeArg) => {
+            return this.isNode(nodeArg) ? this.instantiateNode(nodeArg) : nodeArg;
+        });
+
+        // and then return the top-level one
+        return nodeMap[nodeType].apply(null, fixedNodeArgs);
+    }
+
     constructor(query: any[]){
-
-        const queryLength = query.length - 1;
-
-        const nodeType = query[queryLength][0] as nodeType;
-        if( nodeType !== 'FILESCAN') throw new Error(`Leaf node of query must be a FILESCAN. Got ${nodeType}`);
-        const sourceName = query[queryLength][1];
-
-        let childNode: INode = nodeMap['FILESCAN'](sourceName);
-        let currentNode: INode;
-
-        for(let i = query.length -2; i >= 0; i--){
-
-            const nodeType = query[i][0] as nodeType;
-            const nodeArgs = query[i].slice(1);
-            if(!nodeMap[nodeType]) throw new Error(`Unknown node type ${nodeType}`);
-
-            currentNode = nodeMap[nodeType].apply(null, [childNode].concat(nodeArgs));
-            childNode = currentNode;
-        }
-
-        this.rootNode = childNode;
+        this.rootNode = this.instantiateNode(query);
     }
 
     next(): any {
@@ -62,13 +63,31 @@ class Executor{
     }
 }
 
-const query = [
-    ['SORT', 'title', 'ASC'],
-    ['SELECTION', '>', 'movieId', 3000],
-    ['DISTINCT', 'title'],
-    ['SORT', 'movieId', 'DESC'],
-    ['PROJECTION', ['movieId', 'title']],
-    ['FILESCAN', 'movies']
+// const query = ['SORT', 'title', 'ASC',
+//     ['SELECTION', '>', 'movieId', 50,
+//         ['DISTINCT', 'title',
+//             ['SORT', 'movieId', 'DESC',
+//                 ['HASHJOIN', 'movieId', 'movieId',
+//                     ['PROJECTION', ['movieId', 'title'],
+//                         ['FILESCAN', 'movies']
+//                     ],
+//                     ['FILESCAN', 'ratings']
+//                 ]
+//             ]
+//         ]
+//     ]
+// ];
+
+const query = ['SORT', 'title', 'ASC',
+    ['SELECTION', '>', 'movieId', 50,
+        ['DISTINCT', 'title',
+            ['SORT', 'movieId', 'DESC',
+                ['PROJECTION', ['movieId', 'title'],
+                    ['FILESCAN', 'movies']
+                ],
+            ]
+        ]
+    ]
 ];
 
 let x = new Executor(query);

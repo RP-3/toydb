@@ -38,9 +38,9 @@ export class SortNode {
     private yieldedRowCount = 0;
 
     constructor(
-        private child: INode,
         private columnName: string,
-        private direction: sortDirection
+        private direction: sortDirection,
+        private child: INode
     ){}
 
     next(): any | null {

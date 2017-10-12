@@ -2,11 +2,11 @@ import { INode } from '../executor';
 
 export class ProjectionNode {
 
-    constructor(private child: INode, private columnList: string[]){}
+    constructor(private columnList: string[], private child: INode){}
 
     next(): any | null {
         // get the next row from its child
-        const result = {}; 
+        const result = {};
         const nextRow = this.child.next();
 
         if(nextRow){

@@ -3,8 +3,8 @@ import { INode } from '../executor';
 export class DistinctNode {
 
     constructor(
-        private child: INode,
-        private column: string
+        private column: string,
+        private child: INode
     ){}
 
     private previous: any = undefined
