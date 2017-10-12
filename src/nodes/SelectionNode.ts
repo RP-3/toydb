@@ -12,6 +12,10 @@ export class SelectionNode {
         private child: INode
     ){}
 
+    reset(){
+        this.child.reset();
+    }
+
     next(): any | null {
         // get the next row from its child
         const nextRow = this.child.next();

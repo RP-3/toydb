@@ -9,6 +9,11 @@ export class DistinctNode {
 
     private previous: any = undefined
 
+    reset(){
+        this.child.reset();
+        this.previous = undefined;
+    }
+
     next(): any | null {
         // get the next row from its child
         const nextRow = this.child.next();

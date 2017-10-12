@@ -43,6 +43,13 @@ export class SortNode {
         private child: INode
     ){}
 
+    reset(){
+        this.child.reset();
+        this.yieldedRowCount = 0;
+        this.filledAndSorted = false;
+        this.storage = [];
+    }
+
     next(): any | null {
         // get the next row from its child
         if(!this.filledAndSorted){
@@ -51,7 +58,7 @@ export class SortNode {
             let tmp;
             while(tmp = this.child.next()) this.storage.push(tmp);
             this.filledAndSorted = true;
-            
+
             // bail out if we were given an empty set
             if(!this.storage.length) return null;
 

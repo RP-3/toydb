@@ -1,4 +1,6 @@
 import { FilescanNode } from './nodes/FileScanNode'
+import { HashJoinNode } from './nodes/HashJoinNode'
+import { NestedLoopJoin } from './nodes/NestedLoopJoinNode'
 import { ProjectionNode } from './nodes/ProjectionNode';
 import { SortNode, sortDirection } from './nodes/SortNode';
 import { SelectionNode, operator } from './nodes/SelectionNode';
@@ -9,6 +11,7 @@ const dataDir = '/Users/sarith21/Documents/code/toydb/data/';
 
 export interface INode {
     next: () => any | null;
+    reset: () => void;
 }
 
 const nodeMap = {
@@ -16,6 +19,8 @@ const nodeMap = {
     'DISTINCT': (column: string, child: INode) => new DistinctNode(column, child),
     'SORT': (column: string, direction: sortDirection, child: INode) => new SortNode(column, direction, child),
     'PROJECTION': (columnList: string[], child: INode) => new ProjectionNode(columnList, child),
+    'HASHJOIN': (leftColumn: string, rightColumn: string, leftChild: INode, rightChild: INode) => new HashJoinNode(leftColumn, rightColumn, leftChild, rightChild),
+    'NESTEDJOIN': (leftColumn: string, rightColumn: string, leftChild: INode, rightChild: INode) => new NestedLoopJoin(leftColumn, rightColumn, leftChild, rightChild),
     'FILESCAN': (sourceName: string) => new FilescanNode(dataDir, sourceName),
 }
 
@@ -63,28 +68,17 @@ class Executor{
     }
 }
 
-// const query = ['SORT', 'title', 'ASC',
-//     ['SELECTION', '>', 'movieId', 50,
-//         ['DISTINCT', 'title',
-//             ['SORT', 'movieId', 'DESC',
-//                 ['HASHJOIN', 'movieId', 'movieId',
-//                     ['PROJECTION', ['movieId', 'title'],
-//                         ['FILESCAN', 'movies']
-//                     ],
-//                     ['FILESCAN', 'ratings']
-//                 ]
-//             ]
-//         ]
-//     ]
-// ];
-
-const query = ['SORT', 'title', 'ASC',
+const query =
+['SORT', 'title', 'ASC',
     ['SELECTION', '>', 'movieId', 50,
         ['DISTINCT', 'title',
             ['SORT', 'movieId', 'DESC',
-                ['PROJECTION', ['movieId', 'title'],
-                    ['FILESCAN', 'movies']
-                ],
+                ['NESTEDJOIN', 'movieId', 'movieId',
+                    ['PROJECTION', ['movieId', 'title'],
+                        ['FILESCAN', 'movies']
+                    ],
+                    ['FILESCAN', 'ratings']
+                ]
             ]
         ]
     ]
@@ -92,6 +86,4 @@ const query = ['SORT', 'title', 'ASC',
 
 let x = new Executor(query);
 let tmp;
-while(tmp = x.next()){
-    console.log(tmp);
-}
+while(tmp = x.next()) console.log(tmp);

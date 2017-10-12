@@ -4,6 +4,10 @@ export class ProjectionNode {
 
     constructor(private columnList: string[], private child: INode){}
 
+    reset(){
+        this.child.reset();
+    }
+
     next(): any | null {
         // get the next row from its child
         const result = {};

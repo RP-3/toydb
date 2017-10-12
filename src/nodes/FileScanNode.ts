@@ -2,10 +2,10 @@ import * as fs from 'fs';
 const parse = require('csv-parse/lib/sync');
 
 export class FilescanNode {
-    
+
     private readonly blockSize = 1 << 12; // 4kb 4096 bytes
     private currentBlockIndex = 0;
-    private fileDescriptor: number;
+    // private fileDescriptor: number;
 
     private headerParsed = false;
     private header: string = '';
@@ -15,36 +15,25 @@ export class FilescanNode {
     private readIndex = 0;
 
     parseBlockToCSV(buffer: Buffer){
-
-        // let str = buffer.toString('utf8');
-
-        // parse the header if we haven't already
-        // if(!this.headerParsed){
-        //     this.header = str.split('\n')[0] + '\n';
-        //     str = str.split('\n').slice(1).join(); // we're totally ignoring the case in which the header is longer than the block size
-        //     this.headerParsed = true;
-        // }
-
-        // console.log(this.header + str);
         const newTupleBuffer = parse(this.file, {columns: true, auto_parse: true});
         this.parsedDataBuffer = newTupleBuffer;
     }
 
     loadNextBlock(): void {
-
-        // const previousBlockIndex = this.currentBlockIndex;
-        // this.currentBlockIndex += (this.blockSize);
-
-        // const nextBlock = new Buffer(this.blockSize);
-        // fs.readSync(this.fileDescriptor, nextBlock, 0, this.blockSize, previousBlockIndex);
-        // this.parseBlockToCSV(nextBlock);
-        // this.readIndex = 0;
         this.parseBlockToCSV(new Buffer(4));
     }
 
     constructor(dataDir: string, source: string){
-        // this.fileDescriptor = fs.openSync(`${dataDir}/${source}.csv`, 'r');
         this.file = fs.readFileSync(`${dataDir}/${source}.csv`).toString('utf8');
+        this.loadNextBlock();
+    }
+
+    reset(){
+        this.currentBlockIndex = 0;
+        this.headerParsed = false;
+        this.header = '';
+        this.parsedDataBuffer = [];
+        this.readIndex = 0;
         this.loadNextBlock();
     }
 
