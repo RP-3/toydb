@@ -5,7 +5,7 @@ import { ProjectionNode } from './nodes/ProjectionNode';
 import { SortNode, sortDirection } from './nodes/SortNode';
 import { SelectionNode, operator } from './nodes/SelectionNode';
 import { DistinctNode } from './nodes/DistinctNode';
-import { primitive } from './Schema'
+import { primitive, table, movies, ratings } from './Schema'
 
 const dataDir = '/Users/sarith21/Documents/code/toydb/data/';
 
@@ -21,7 +21,7 @@ const nodeMap = {
     'PROJECTION': (columnList: string[], child: INode) => new ProjectionNode(columnList, child),
     'HASHJOIN': (leftColumn: string, rightColumn: string, leftChild: INode, rightChild: INode) => new HashJoinNode(leftColumn, rightColumn, leftChild, rightChild),
     'NESTEDJOIN': (leftColumn: string, rightColumn: string, leftChild: INode, rightChild: INode) => new NestedLoopJoin(leftColumn, rightColumn, leftChild, rightChild),
-    'FILESCAN': (sourceName: string) => new FilescanNode(dataDir, sourceName),
+    'FILESCAN': (sourceName: table) => new FilescanNode(dataDir, sourceName),
 }
 
 type nodeType = 'SELECTION' | 'DISTINCT' | 'SORT' | 'PROJECTION' | 'FILESCAN';
@@ -69,20 +69,20 @@ class Executor{
 }
 
 const query =
-['SORT', 'title', 'ASC',
-    ['SELECTION', '>', 'movieId', 50,
-        ['DISTINCT', 'title',
-            ['SORT', 'movieId', 'DESC',
+// ['SORT', 'title', 'ASC',
+    // ['SELECTION', '>', 'movieId', 50,
+        // ['DISTINCT', 'title',
+            // ['SORT', 'movieId', 'DESC',
                 ['NESTEDJOIN', 'movieId', 'movieId',
                     ['PROJECTION', ['movieId', 'title'],
-                        ['FILESCAN', 'movies']
+                        ['FILESCAN', movies]
                     ],
-                    ['FILESCAN', 'ratings']
+                    ['FILESCAN', ratings]
                 ]
-            ]
-        ]
-    ]
-];
+            // ]
+        // ]
+    // ]
+// ];
 
 let x = new Executor(query);
 let tmp;

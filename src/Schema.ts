@@ -2,7 +2,7 @@ export type primitive = number | string | boolean;
 
 export type column = {
     name: string,
-    type: primitive,
+    type: 'string' | 'integer' | 'float' | 'boolean',
     size: number
 }
 
@@ -16,7 +16,7 @@ const movies = {
     columns: [
         {
             name: 'movieId',
-            type: 'number',
+            type: 'integer',
             size: 4
         },
         {
@@ -31,3 +31,31 @@ const movies = {
         }
     ]
 } as table;
+
+const ratings = {
+    name: 'ratings',
+    columns: [
+        {
+            name: 'userId',
+            type: 'integer',
+            size: 4
+        },
+        {
+            name: 'movieId',
+            type: 'integer',
+            size: 4
+        },
+        {
+            name: 'rating',
+            type: 'float',
+            size: 4
+        },
+        {
+            name: 'timestamp',
+            type: 'integer',
+            size: 4
+        }
+    ]
+} as table;
+
+export { movies, ratings };
