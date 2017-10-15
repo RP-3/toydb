@@ -11,7 +11,8 @@
         "noImplicitAny": true,
         "removeComments": true,
         "baseUrl": "src",
-        "noLib": false
+        "noLib": false,
+        "lib": ["es5", "es6"]
     },
     "include": [
         "./src/**/*"
