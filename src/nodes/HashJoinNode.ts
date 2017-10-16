@@ -34,12 +34,12 @@ export class HashJoinNode {
 
         if(!this.leftLoaded) this.loadLeftRelation();
 
-        const nextVal = this.rightChild.next();
-        if(!nextVal) return null;
+        while(true){
+            const nextVal = this.rightChild.next();
+            if(!nextVal) return null;
 
-        const matchedRecord = this.storage[nextVal[this.rightColumn]];
-        if(matchedRecord) return this.joinRecords(matchedRecord, nextVal);
-
-        return this.next();
+            const matchedRecord = this.storage[nextVal[this.rightColumn]];
+            if(matchedRecord) return this.joinRecords(matchedRecord, nextVal);
+        }
     }
 }

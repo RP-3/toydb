@@ -1,3 +1,5 @@
+require('source-map-support').install()
+
 import { FilescanNode } from './nodes/FileScanNode'
 import { HashJoinNode } from './nodes/HashJoinNode'
 import { NestedLoopJoin } from './nodes/NestedLoopJoinNode'
@@ -73,9 +75,11 @@ const query =
     // ['SELECTION', '>', 'movieId', 50,
         // ['DISTINCT', 'title',
             // ['SORT', 'movieId', 'DESC',
-                ['NESTEDJOIN', 'movieId', 'movieId',
-                    ['PROJECTION', ['movieId', 'title'],
-                        ['FILESCAN', movies]
+                ['HASHJOIN', 'movieId', 'movieId',
+                    ['SELECTION', '=', 'title', 'Dark Knight Rises, The (2012)',
+                        ['PROJECTION', ['movieId', 'title'],
+                            ['FILESCAN', movies]
+                        ]
                     ],
                     ['FILESCAN', ratings]
                 ]

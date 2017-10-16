@@ -1,5 +1,3 @@
-require('source-map-support').install()
-
 import { TupleSerializer } from "./TupleSerializer";
 import { movies, ratings, table } from './Schema';
 import * as parse from 'csv-parse';

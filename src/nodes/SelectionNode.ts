@@ -16,22 +16,25 @@ export class SelectionNode {
         this.child.reset();
     }
 
+    private tuplePassesPredicate(val: any){
+        if(this.operator === 'ISNULL') return val === null;
+        else if(this.operator === 'ISNOTNULL') return val !== null;
+        else if(this.operator === '=') return val === this.constant;
+        else if(this.operator === '<') return val < this.constant;
+        else if(this.operator === '>') return val > this.constant;
+        else if(this.operator === '>=') return val <= this.constant;
+        else if(this.operator === '<=') return val >= this.constant;
+        else new Error(`Selection node encountered unknown operator ${this.operator}`);
+    }
+
     next(): any | null {
-        // get the next row from its child
-        const nextRow = this.child.next();
 
-        if(nextRow === null) return null; // we've run out of rows
+        while(true){
+            const nextRow = this.child.next(); // get the next row from its child
+            if(nextRow === null) return null; // we've run out of rows
 
-        const val = nextRow[this.column];
-
-        if(this.operator === 'ISNULL') return val === null ? nextRow : this.next();
-        if(this.operator === 'ISNOTNULL') return val !== null ? nextRow : this.next();
-        if(this.operator === '=') return val === this.constant ? nextRow : this.next();
-        if(this.operator === '<') return val < this.constant ? nextRow : this.next();
-        if(this.operator === '>') return val > this.constant ? nextRow : this.next();
-        if(this.operator === '>=') return val <= this.constant ? nextRow : this.next();
-        if(this.operator === '<=') return val >= this.constant ? nextRow : this.next();
-
-        throw new Error(`Selection node encountered unknown operator ${this.operator}`);
+            const val = nextRow[this.column]; // parse the desired value out
+            if(this.tuplePassesPredicate(val)) return nextRow;
+        }
     }
 }
