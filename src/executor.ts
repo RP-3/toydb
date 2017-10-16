@@ -6,6 +6,7 @@ import { NestedLoopJoin } from './nodes/NestedLoopJoinNode'
 import { ProjectionNode } from './nodes/ProjectionNode';
 import { SortNode, sortDirection } from './nodes/SortNode';
 import { SelectionNode, operator } from './nodes/SelectionNode';
+import { AverageNode } from './nodes/AverageNode';
 import { DistinctNode } from './nodes/DistinctNode';
 import { primitive, table, movies, ratings } from './Schema'
 
@@ -19,6 +20,7 @@ export interface INode {
 const nodeMap = {
     'SELECTION': (o: operator, column: string, constant: primitive, child: INode) => new SelectionNode(o, column, constant, child),
     'DISTINCT': (column: string, child: INode) => new DistinctNode(column, child),
+    'AVERAGE': (column: string, child: INode) => new AverageNode(column, child),
     'SORT': (column: string, direction: sortDirection, child: INode) => new SortNode(column, direction, child),
     'PROJECTION': (columnList: string[], child: INode) => new ProjectionNode(columnList, child),
     'HASHJOIN': (leftColumn: string, rightColumn: string, leftChild: INode, rightChild: INode) => new HashJoinNode(leftColumn, rightColumn, leftChild, rightChild),
@@ -75,14 +77,18 @@ const query =
     // ['SELECTION', '>', 'movieId', 50,
         // ['DISTINCT', 'title',
             // ['SORT', 'movieId', 'DESC',
-                ['HASHJOIN', 'movieId', 'movieId',
+            // ['AVERAGE', 'rating',
+                ['NESTEDJOIN', 'movieId', 'movieId',
                     ['SELECTION', '=', 'title', 'Dark Knight Rises, The (2012)',
                         ['PROJECTION', ['movieId', 'title'],
                             ['FILESCAN', movies]
                         ]
                     ],
-                    ['FILESCAN', ratings]
+                    ['PROJECTION', ['rating', 'movieId'],
+                        ['FILESCAN', ratings]
+                    ]
                 ]
+            // ]
             // ]
         // ]
     // ]
